@@ -35,6 +35,7 @@ int main(int argc, char const** argv)
     }
 
     // Play the music
+    //asdfasdf
     music.play();
 
     // Start the game loop
