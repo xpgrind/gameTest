@@ -1,72 +1,131 @@
-#include <SFML/Audio.hpp>
+//
+//  Game.cpp
+//  2nd_pgm
+//
+//  Created by Dizhu Zheng on 6/27/17.
+//  Copyright © 2017 Dizhu. All rights reserved.
+//
+
 #include <SFML/Graphics.hpp>
+#include<iostream>
 
-int main(int argc, char const** argv)
+class Game
 {
-    // Create the main window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
+public:
+    Game();
+    void run();
+    
+private:
+    void processEvents();
+    void handlePlayerInput(sf::Keyboard:: Key, bool);
+    void update(sf::Time);
+    void render();
+    sf::Texture mTexture;
+    sf::Sprite mPlayer;
+    sf:: RenderWindow mWindow;
+    //   sf::CircleShape mPlayer;
+    const sf::Time TimePerFrame = sf::seconds(1.f/60.f);
+    bool mIsMovingUp = false;
+    bool mIsMovingDown = false;
+    bool mIsMovingLeft = false;
+    bool mIsMovingRight = false;
+};
 
-    // Set the Icon
-    sf::Image icon;
-    if (!icon.loadFromFile("icon.png")) {
-        return EXIT_FAILURE;
-    }
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
-    // Load a sprite to display
-    sf::Texture texture;
-    if (!texture.loadFromFile("cute_image.jpg")) {
-        return EXIT_FAILURE;
-    }
-    sf::Sprite sprite(texture);
-
-    // Create a graphical text to display
-    sf::Font font;
-    if (!font.loadFromFile("sansation.ttf")) {
-        return EXIT_FAILURE;
-    }
-    sf::Text text("Hello SFML", font, 50);
-    text.setFillColor(sf::Color::Black);
-
-    // Load a music to play
-    sf::Music music;
-    if (!music.openFromFile("nice_music.ogg")) {
-        return EXIT_FAILURE;
-    }
-
-    // Play the music
-    music.play();
-
-    // Start the game loop
-    while (window.isOpen())
+Game::Game(): mWindow(sf::VideoMode(840,680), "SFML Application"), mTexture(), mPlayer()
+{
+    //    mPlayer.setRadius(40.f);
+    //    mPlayer.setPosition(100.f,100.f);
+    //    mPlayer.setFillColor(sf::Color::Cyan);
+    
+    if(!mTexture.loadFromFile("spaceship.png"))
     {
-        // Process events
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            // Close window: exit
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-
-            // Escape pressed: exit
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                window.close();
-            }
-        }
-
-        // Clear screen
-        window.clear();
-
-        // Draw the sprite
-        window.draw(sprite);
-
-        // Draw the string
-        window.draw(text);
-
-        // Update the window
-        window.display();
+        std::cout<<" Coudn't open the path."<<std::endl;
     }
-
-    return EXIT_SUCCESS;
+    
+    mPlayer.setTextureRect(sf::IntRect(20, 20, 400, 400));
+    mPlayer.setTexture(mTexture);
+    mPlayer.setPosition(100.f,100.f);
 }
+
+void Game::run()
+{
+    sf::Clock clock;
+    sf:: Time timeSinceLastUpdate = sf::Time::Zero;
+    
+    while(mWindow.isOpen())
+    {
+        processEvents();//pro events cost different time
+        timeSinceLastUpdate += clock.restart();
+        
+        while(timeSinceLastUpdate > TimePerFrame)
+        {
+            timeSinceLastUpdate -= TimePerFrame;
+            processEvents();
+            update(TimePerFrame);
+        }
+        //      update(deltaTime);//so this differs, we need a fixed time tech
+        render();
+    }
+}
+
+void Game::processEvents()
+{
+    sf::Event event;
+    while(mWindow.pollEvent(event))
+    {
+        switch(event.type)
+        {
+            case sf::Event::KeyPressed:
+                handlePlayerInput(event.key.code,true);
+                break;
+            case sf::Event::KeyReleased:
+                handlePlayerInput(event.key.code,false);
+                break;
+            case sf::Event::Closed:
+                mWindow.close();
+                break;
+        }
+    }
+}
+
+void Game::update(sf::Time deltaTime)
+{
+    sf::Vector2f movement(0.f,0.f);
+    if(mIsMovingDown)
+        movement.y += 1.f;
+    if(mIsMovingUp)
+        movement.y -= 1.f;
+    if(mIsMovingLeft)
+        movement.x -= 1.f;
+    if(mIsMovingRight)
+        movement.x += 1.f;
+    
+    float speed = 100;
+    mPlayer.move(movement * speed * deltaTime.asSeconds());
+}
+
+void Game::render()
+{
+    mWindow.clear();
+    mWindow.draw(mPlayer);
+    mWindow.display();
+}
+
+void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
+{
+    if(key == sf::Keyboard::W)
+        mIsMovingUp = isPressed;
+    else if (key == sf:: Keyboard::A)
+        mIsMovingLeft = isPressed;
+    else if(key == sf::Keyboard::S)
+        mIsMovingDown = isPressed;
+    else if(key == sf::Keyboard::D)
+        mIsMovingRight = isPressed;
+}
+
+int main()
+{
+    Game game;
+    game.run();
+}
+
