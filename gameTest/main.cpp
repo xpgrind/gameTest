@@ -100,7 +100,7 @@ void Game::update(sf::Time deltaTime)
     if(mIsMovingRight)
         movement.x += 1.f;
     
-    float speed = 300;
+    float speed = 800;
     mPlayer.move(movement * speed * deltaTime.asSeconds());
 }
 
