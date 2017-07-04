@@ -100,7 +100,7 @@ void Game::update(sf::Time deltaTime)
     if(mIsMovingRight)
         movement.x += 1.f;
     
-    float speed = 100;
+    float speed = 300;
     mPlayer.move(movement * speed * deltaTime.asSeconds());
 }
 
@@ -123,8 +123,13 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
         mIsMovingRight = isPressed;
 }
 
+void printStuff(){
+    std::cout <<"Hello, World!" << std::endl;
+}
+
 int main()
 {
+    printStuff();
     Game game;
     game.run();
 }
